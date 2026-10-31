@@ -46,3 +46,18 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
+def main() -> None:
+    # Пароль не выводим — только факт, что он задан
+    print(f"ENV_FILE: {ENV_FILE}")
+    print(f"SMTP: {settings.SMTP_USER or '<не задан>'} @ {settings.SMTP_HOST}:{settings.SMTP_PORT}")
+    print(f"SMTP_PASSWORD задан: {'да' if settings.SMTP_PASSWORD else 'нет'}")
+    print(f"EMAIL_SUBJECT: {settings.EMAIL_SUBJECT}")
+    print(f"XLS_PATH: {settings.XLS_PATH}")
+    print(f"CSV_PATH: {settings.CSV_PATH}")
+    print(f"TEMPLATE_PATH: {settings.TEMPLATE_PATH}")
+
+
+if __name__ == "__main__":
+    main()

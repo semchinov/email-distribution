@@ -25,3 +25,11 @@ def convert_xls_to_csv(
         for row_num in range(sheet.nrows):
             writer.writerow(map(cell_to_str, sheet.row_values(row_num)))
     print(f"{xls_path} -> {csv_path}: строк данных {sheet.nrows - 1}")
+
+
+def main() -> None:
+    convert_xls_to_csv()
+
+
+if __name__ == "__main__":
+    main()

@@ -85,3 +85,12 @@ def send_emails(
     print(f"\nУспешно: {ok}, ошибок: {len(failed)}")
     for email in failed:
         print(f"  не отправлено: {email}")
+
+
+def main() -> None:
+    send = "--send" in sys.argv
+    send_emails(send)
+
+
+if __name__ == "__main__":
+    main()
