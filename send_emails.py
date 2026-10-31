@@ -1,10 +1,13 @@
 # send_emails.py
 
 import csv
+import html
 import smtplib
 import sys
 from email.message import EmailMessage
 from pathlib import Path
+
+import markdown
 
 from settings import settings
 
@@ -45,11 +48,19 @@ def send_emails(
     smtp_password: str = settings.SMTP_PASSWORD,
 ) -> None:
     template = template_path.read_text(encoding="utf-8")
+    # Markdown -> HTML до подстановки, чтобы символы ключа (_, *) не превратились в разметку
+    html_template = markdown.markdown(template)
     recipients = load_recipients(csv_path)
 
     # Проверяем шаблон на каждом получателе до отправки, чтобы не упасть посреди рассылки
     try:
-        bodies = [template.format_map(r) for r in recipients]
+        bodies = [
+            (
+                template.format_map(r),
+                html_template.format_map({k: html.escape(v) for k, v in r.items()}),
+            )
+            for r in recipients
+        ]
     except (KeyError, ValueError, IndexError) as e:
         sys.exit(f"Ошибка в шаблоне {template_path}: {type(e).__name__} {e}")
 
@@ -67,12 +78,13 @@ def send_emails(
     ok, failed = 0, []
     with smtplib.SMTP_SSL(smtp_host, smtp_port) as smtp:
         smtp.login(smtp_user, smtp_password)
-        for r, body in zip(recipients, bodies):
+        for r, (text_body, html_body) in zip(recipients, bodies):
             msg = EmailMessage()
             msg["Subject"] = subject
             msg["From"] = smtp_user
             msg["To"] = r["email"]
-            msg.set_content(body)
+            msg.set_content(text_body)
+            msg.add_alternative(html_body, subtype="html")
             try:
                 smtp.send_message(msg)
                 ok += 1

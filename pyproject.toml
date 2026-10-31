@@ -5,6 +5,7 @@ description = "Email distribution system for sending emails to multiple recipien
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "markdown>=3.11.2",
     "pydantic-settings>=2.16.2",
     "xlrd>=2.0.2",
 ]
