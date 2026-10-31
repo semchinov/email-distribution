@@ -2,8 +2,10 @@
 
 import csv
 import html
+import random
 import smtplib
 import sys
+import time
 from email.message import EmailMessage
 from pathlib import Path
 
@@ -46,6 +48,9 @@ def send_emails(
     smtp_port: int = settings.SMTP_PORT,
     smtp_user: str = settings.SMTP_USER,
     smtp_password: str = settings.SMTP_PASSWORD,
+    send_delay: tuple[float, float] = settings.SEND_DELAY,
+    batch_size: int = settings.BATCH_SIZE,
+    batch_delay: tuple[float, float] = settings.BATCH_DELAY,
 ) -> None:
     template = template_path.read_text(encoding="utf-8")
     # Markdown -> HTML до подстановки, чтобы символы ключа (_, *) не превратились в разметку
@@ -78,7 +83,7 @@ def send_emails(
     ok, failed = 0, []
     with smtplib.SMTP_SSL(smtp_host, smtp_port) as smtp:
         smtp.login(smtp_user, smtp_password)
-        for r, (text_body, html_body) in zip(recipients, bodies):
+        for i, (r, (text_body, html_body)) in enumerate(zip(recipients, bodies), start=1):
             msg = EmailMessage()
             msg["Subject"] = subject
             msg["From"] = smtp_user
@@ -93,6 +98,14 @@ def send_emails(
                 # Только тип ошибки — без текста, чтобы не утёк ключ
                 failed.append(r["email"])
                 print(f"  ✗ {r['email']}: {type(e).__name__}")
+
+            if i == len(recipients):
+                break
+            delay = random.uniform(*send_delay)
+            if i % batch_size == 0:
+                delay += random.uniform(*batch_delay)
+            print(f"    пауза {delay:.1f} с")
+            time.sleep(delay)
 
     print(f"\nУспешно: {ok}, ошибок: {len(failed)}")
     for email in failed:

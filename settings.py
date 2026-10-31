@@ -29,6 +29,14 @@ class Settings(BaseSettings):
 
     # endregion emailSettings
 
+    # region delaySettings
+
+    SEND_DELAY: tuple[float, float] = (5, 10)  # пауза между письмами, сек
+    BATCH_SIZE: int = 10  # каждые N писем — дополнительная пауза
+    BATCH_DELAY: tuple[float, float] = (10, 20)  # дополнительная пауза, сек
+
+    # endregion delaySettings
+
     # region pathSettings
 
     XLS_PATH: Path = ROOT_DIR / "recipients.xls"
